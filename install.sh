@@ -11,11 +11,11 @@ echo "===================="
 ARCH=$(uname -m)
 case "$ARCH" in
   arm64|aarch64)
-    ARCH_KEY="arm64"
+    ASSET_NAME="Solara-arm64.zip"
     echo "Detected: Apple Silicon ($ARCH)"
     ;;
   x86_64|amd64)
-    ARCH_KEY="x86_64"
+    ASSET_NAME="Solara-x86_64.zip"
     echo "Detected: Intel ($ARCH)"
     ;;
   *)
@@ -24,32 +24,26 @@ case "$ARCH" in
     ;;
 esac
 
-
-if [ "$ARCH_KEY" = "arm64" ]; then
-  ASSET_NAME="Solara-arm64.zip"
-else
-  ASSET_NAME="Solara-x86_64.zip"
-fi
-
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$ASSET_NAME"
 
+TMP_ZIP="/tmp/$ASSET_NAME"
+TMP_DIR=$(mktemp -d)
+
 echo "🔗 Downloading: $DOWNLOAD_URL"
-
-TMP_DMG="/tmp/$ASSET_NAME"
-
-curl -fL "$DOWNLOAD_URL" -o "$TMP_DMG" || {
+curl -fL "$DOWNLOAD_URL" -o "$TMP_ZIP" || {
   echo "❌ Download failed."
-  echo "Make sure this file exists:"
-  echo "  $ASSET_NAME"
   exit 1
 }
 
-echo "📂 Mounting DMG..."
-MOUNT_POINT=$(mktemp -d)
-hdiutil attach "$TMP_DMG" -mountpoint "$MOUNT_POINT" -nobrowse
+echo "📦 Extracting ZIP..."
+unzip -q "$TMP_ZIP" -d "$TMP_DIR"
 
-APP_SRC="$MOUNT_POINT/Solara.app"
-[ ! -d "$APP_SRC" ] && { echo "❌ Solara.app not found in DMG"; hdiutil detach "$MOUNT_POINT"; exit 1; }
+APP_SRC=$(find "$TMP_DIR" -maxdepth 2 -name "Solara.app" -type d | head -n 1)
+
+if [ -z "$APP_SRC" ]; then
+  echo "❌ Solara.app not found in ZIP"
+  exit 1
+fi
 
 if [ -d "/Applications/Solara.app" ]; then
   echo "♻️ Removing existing installation..."
@@ -58,18 +52,16 @@ fi
 
 echo "💾 Installing..."
 if [ -w /Applications ]; then
-  cp -R "$APP_SRC" /Applications/Solara.app
+  cp -R "$APP_SRC" /Applications/
 else
-  sudo cp -R "$APP_SRC" /Applications/Solara.app
+  sudo cp -R "$APP_SRC" /Applications/
 fi
 
 echo "🛡️ Removing quarantine flags..."
 xattr -rd com.apple.quarantine /Applications/Solara.app 2>/dev/null || true
 
-echo "🔌 Unmounting DMG..."
-hdiutil detach "$MOUNT_POINT"
-rm -f "$TMP_DMG"
-rmdir "$MOUNT_POINT" 2>/dev/null || true
+echo "🧹 Cleaning up..."
+rm -rf "$TMP_DIR" "$TMP_ZIP"
 
 echo ""
 echo "✅ Solara installed successfully!"
