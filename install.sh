@@ -26,9 +26,9 @@ esac
 
 # ---- MANUAL ASSET NAME (adjust if needed) ----
 if [ "$ARCH_KEY" = "arm64" ]; then
-  ASSET_NAME="Solara-1.0.0-arm64.dmg"
+  ASSET_NAME="Solara-arm64.dmg"
 else
-  ASSET_NAME="Solara-1.0.0.dmg"
+  ASSET_NAME="Solara-x86_64.dmg"
 fi
 
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$ASSET_NAME"
