@@ -26,9 +26,9 @@ esac
 
 
 if [ "$ARCH_KEY" = "arm64" ]; then
-  ASSET_NAME="Solara-arm64.dmg"
+  ASSET_NAME="Solara-arm64.zip"
 else
-  ASSET_NAME="Solara-x86_64.dmg"
+  ASSET_NAME="Solara-x86_64.zip"
 fi
 
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$ASSET_NAME"
