@@ -24,7 +24,7 @@ case "$ARCH" in
     ;;
 esac
 
-# ---- MANUAL ASSET NAME (adjust if needed) ----
+
 if [ "$ARCH_KEY" = "arm64" ]; then
   ASSET_NAME="Solara-arm64.dmg"
 else
