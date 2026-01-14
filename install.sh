@@ -8,21 +8,29 @@ TAG="Releases"
 echo "🚀 Solara Installer"
 echo "===================="
 
+OS_VERSION=$(sw_vers -productVersion | cut -d. -f1,2)
 ARCH=$(uname -m)
-case "$ARCH" in
-  arm64|aarch64)
-    ASSET_NAME="Solara-arm64.zip"
-    echo "Detected: Apple Silicon ($ARCH)"
-    ;;
-  x86_64|amd64)
-    ASSET_NAME="Solara-x86_64.zip"
-    echo "Detected: Intel ($ARCH)"
-    ;;
-  *)
-    echo "❌ Unsupported architecture: $ARCH"
-    exit 1
-    ;;
-esac
+
+# Catalina detection (10.15)
+if [[ "$OS_VERSION" == "10.15" ]]; then
+  ASSET_NAME="Solara-catliona.zip"
+  echo "Detected: macOS Catalina ($OS_VERSION)"
+else
+  case "$ARCH" in
+    arm64|aarch64)
+      ASSET_NAME="Solara-arm64.zip"
+      echo "Detected: Apple Silicon ($ARCH)"
+      ;;
+    x86_64|amd64)
+      ASSET_NAME="Solara-x86_64.zip"
+      echo "Detected: Intel ($ARCH)"
+      ;;
+    *)
+      echo "❌ Unsupported architecture: $ARCH"
+      exit 1
+      ;;
+  esac
+fi
 
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$TAG/$ASSET_NAME"
 
